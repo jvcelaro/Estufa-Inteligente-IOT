@@ -1,0 +1,212 @@
+[
+    {
+        "id": "b7c0798701708649",
+        "type": "mqtt in",
+        "z": "6f0d7eb12948fba5",
+        "name": "",
+        "topic": "temperature_humidity",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "83c3ae66da808635",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 500,
+        "y": 300,
+        "wires": [
+            [
+                "1d282addcf6aa135",
+                "de4685b1d4c92804",
+                "3cd1127d6921385f"
+            ]
+        ]
+    },
+    {
+        "id": "1d282addcf6aa135",
+        "type": "function",
+        "z": "6f0d7eb12948fba5",
+        "name": "STATUS WPP ESTUFA",
+        "func": "\nlet temperatura = msg.payload.t;\nlet umidade = msg.payload.u;\n\nlet status = \"\";\nlet mensagem = \"\";\n\nif (temperatura > 45) {\n    status = \"Sufocante\";\n} else if (temperatura >= 31 && temperatura <= 45) {\n    status = \"Quente\";\n} else if (temperatura >= 24 && temperatura <= 30) {\n    status = \"Morno\";\n} else if (temperatura >= 19 && temperatura <= 23) {\n    status = \"Fresco\";\n} else if (temperatura >= -15 && temperatura <= 18) {\n    status = \"Frio\";\n} else if (temperatura < -15) {\n    status = \"Congelante\";\n} else {\n    status = \"Temperatura inválida\";\n}\n\nif (umidade > 80) {\n    mensagem = \"Umidade muito alta\";\n} else if (umidade >= 60) {\n    mensagem = \"Umidade alta\";\n} else if (umidade >= 40) {\n    mensagem = \"Umidade média\";\n} else if (umidade >= 20) {\n    mensagem = \"Umidade baixa\";\n} else {\n    mensagem = \"Umidade muito baixa\";\n}\n\nmsg.payload = `Temperatura: ${temperatura}°C - Condição: ${status}, Umidade: ${umidade}% - Condição: ${mensagem}`;\n\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 400,
+        "wires": [
+            [
+                "4afcdecf9687ed75"
+            ]
+        ]
+    },
+    {
+        "id": "80e43b272e1b1e26",
+        "type": "debug",
+        "z": "6f0d7eb12948fba5",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1280,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "4afcdecf9687ed75",
+        "type": "node-red-contrib-whatsapp-cmb-send-message",
+        "z": "6f0d7eb12948fba5",
+        "name": "Temp_Hum Alert",
+        "credtype": "account",
+        "account": "abd06a42a12ac68b",
+        "text": "payload",
+        "phonenumbervalue": "",
+        "apikeyvalue": "",
+        "apikeyinputtypemessage": "msg",
+        "phonenumberinputtypemessage": "msg",
+        "inputtypemessage": "msg",
+        "rejectssl": false,
+        "x": 1020,
+        "y": 480,
+        "wires": [
+            [
+                "80e43b272e1b1e26"
+            ]
+        ]
+    },
+    {
+        "id": "aeb4be96abc37d9c",
+        "type": "influxdb out",
+        "z": "6f0d7eb12948fba5",
+        "influxdb": "8467099875a3ab9b",
+        "name": "INFLUX DB",
+        "measurement": "Umidade1",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "Mackenzie IOT",
+        "bucket": "IOT",
+        "x": 1050,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "de4685b1d4c92804",
+        "type": "function",
+        "z": "6f0d7eb12948fba5",
+        "name": "TO INFLUX HUM",
+        "func": "let umidade = parseFloat(msg.payload.u);\nmsg.payload = umidade;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 260,
+        "wires": [
+            [
+                "aeb4be96abc37d9c"
+            ]
+        ]
+    },
+    {
+        "id": "8689ac8f4f669a2f",
+        "type": "influxdb out",
+        "z": "6f0d7eb12948fba5",
+        "influxdb": "8467099875a3ab9b",
+        "name": "INFLUX DB",
+        "measurement": "Temperatura1",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "Mackenzie IOT",
+        "bucket": "IOT",
+        "x": 1050,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "3cd1127d6921385f",
+        "type": "function",
+        "z": "6f0d7eb12948fba5",
+        "name": "TO INFLUX HUM",
+        "func": "let temperatura = parseFloat(msg.payload.t);\nmsg.payload = temperatura;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 200,
+        "wires": [
+            [
+                "8689ac8f4f669a2f"
+            ]
+        ]
+    },
+    {
+        "id": "83c3ae66da808635",
+        "type": "mqtt-broker",
+        "name": "hivemq estufa",
+        "broker": "964e80a2593d41cd80bf0518aaeb7473.s1.eu.hivemq.cloud",
+        "port": "8883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "conn",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "ok",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "abd06a42a12ac68b",
+        "type": "node-red-contrib-whatsapp-cmb-account",
+        "name": "IOT-ESTUFA"
+    },
+    {
+        "id": "8467099875a3ab9b",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "DB IOT BUCKET",
+        "name": "INFLUX DB",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "https://us-east-1-1.aws.cloud2.influxdata.com",
+        "timeout": "10",
+        "rejectUnauthorized": false
+    }
+]
